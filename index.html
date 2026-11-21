@@ -9,7 +9,7 @@
 <meta property="og:description" content="Calculadora gratuita de food cost y app Android para costear recetas. Pago único, sin suscripción.">
 <meta property="og:type" content="website">
 <style>
-:root{--bg:#fbf7f2;--ink:#2b2320;--muted:#6b5f58;--accent:#c4552d;--accent-d:#9e3f1c;--card:#fff;--line:#eadfd5;--ok:#2f7a4b}
+:root{--bg:#fbf7f2;--ink:#2b2320;--muted:#6b5f58;--accent:#c4552d;--accent-d:#9e3f1c;--card:#fff;--line:#eadfd5;--soft:#f7efe7;--warn:#a5361b}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;font-size:17px}
@@ -29,17 +29,31 @@ header.top{display:flex;align-items:center;justify-content:space-between;padding
 section{padding:48px 0}
 h2{font-size:clamp(26px,4vw,36px);letter-spacing:-.02em;margin:0 0 10px}
 .lead{color:var(--muted);margin:0 0 26px;max-width:62ch}
-.calc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 1px 0 rgba(0,0,0,.02)}
-.row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 36px;gap:8px;align-items:end;margin-bottom:8px}
-.row.head{font-size:13px;color:var(--muted);font-weight:600}
-input,select{width:100%;font:inherit;font-size:16px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+.calc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px}
+input,select{font:inherit;font-size:16px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
 input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
-.m{display:none;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:2px}
-.del{background:none;border:0;font-size:22px;color:var(--muted);cursor:pointer;line-height:1}
-.params{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
 label{font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px}
+.top-params{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-bottom:18px}
+.top-params input,.top-params select{width:100%}
+#recipe{font-size:20px;font-weight:700}
+.steps{font-size:15px;color:var(--muted);background:var(--soft);border-radius:12px;padding:12px 16px;margin:0 0 18px}
+.steps b{color:var(--ink)}
+.ing{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;background:#fffdfb}
+.ing-head{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.ing-head input{flex:1;min-width:0;font-weight:700}
+.del{background:none;border:0;font-size:24px;color:var(--muted);cursor:pointer;line-height:1;padding:4px 8px}
+.ing-body{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;font-size:15px}
+.grp{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.grp span.t{color:var(--muted)}
+.qty{width:96px;text-align:right}
+.unit{width:auto}
+.cost{margin-left:auto;font-weight:700;white-space:nowrap}
+.cost small{font-weight:400;color:var(--muted)}
+.err{color:var(--warn);font-size:13px;width:100%}
+.params{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.params input{width:100%}
 .results{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
-.res{background:#f7efe7;border-radius:14px;padding:16px}
+.res{background:var(--soft);border-radius:14px;padding:16px}
 .res b{display:block;font-size:26px;letter-spacing:-.02em}
 .res span{font-size:13px;color:var(--muted)}
 .res.main{background:var(--accent);color:#fff}
@@ -60,12 +74,13 @@ details p{color:var(--muted);margin:10px 0 0}
 footer{padding:36px 0 60px;color:var(--muted);font-size:14px;border-top:1px solid var(--line);margin-top:24px}
 footer a{color:var(--muted)}
 @media (max-width:760px){
- .row{grid-template-columns:1fr 1fr 1fr 32px}
- .row .name{grid-column:1 / -1}
- .row.head{display:none}
- .m{display:block}
- .row{background:#faf5f0;padding:10px;border-radius:12px}
+ .calc{padding:16px}
+ .top-params{grid-template-columns:1fr 1fr}
+ .top-params .rname{grid-column:1 / -1}
  .params{grid-template-columns:1fr 1fr}
+ .params .pfc{grid-column:1 / -1}
+ .ing-body{flex-direction:column;align-items:flex-start}
+ .cost{margin-left:0}
  .results{grid-template-columns:1fr}
  .grid,.price{grid-template-columns:1fr}
 }
@@ -89,25 +104,31 @@ footer a{color:var(--muted)}
 <section id="calculadora">
  <div class="wrap">
   <h2>Calculadora gratuita de food cost</h2>
-  <p class="lead">Añade los ingredientes de una receta y descubre su coste por ración y el precio de venta que deberías cobrar. Todo se calcula en tu navegador: no se guarda ningún dato.</p>
+  <p class="lead">Te dejamos un ejemplo con una paella para 4 personas. Cambia los ingredientes, las cantidades y los precios por los tuyos y verás al momento cuánto te cuesta cada ración y a cuánto deberías venderla. Todo se calcula en tu navegador: no se guarda ningún dato.</p>
   <div class="calc">
-   <div class="row head"><div>Ingrediente</div><div>Cantidad usada</div><div>Precio de compra</div><div>Cantidad comprada</div><div></div></div>
-   <div id="rows"></div>
+   <div class="top-params">
+    <div class="rname"><label for="recipe">Receta</label><input id="recipe" value="Paella de marisco"></div>
+    <div><label for="porc">Raciones</label><input id="porc" class="num" inputmode="decimal" value="4"></div>
+    <div><label for="cur">Moneda</label><select id="cur"><option value="€">€ (euro)</option><option value="$">$ (peso / dólar)</option><option value="S/">S/ (sol)</option></select></div>
+   </div>
+
+   <p class="steps">Para cada ingrediente indica <b>cuánto usas</b> en la receta y <b>a qué precio lo compras</b>. Por ejemplo: «usas 320 g de arroz» y «lo compras a 3,50 € por 1 kg». Puedes mezclar unidades del mismo tipo (g y kg, ml y l): la calculadora las convierte.</p>
+
+   <div id="ings"></div>
    <button class="btn ghost" id="add" type="button">+ Añadir ingrediente</button>
 
    <div class="params">
-    <div><label for="cur">Moneda</label><select id="cur"><option value="€">€ (euro)</option><option value="$">$ (peso / dólar)</option><option value="S/">S/ (sol)</option></select></div>
-    <div><label for="merma">Merma (%)</label><input id="merma" type="number" min="0" max="90" step="1" value="5" inputmode="decimal"></div>
-    <div><label for="porc">Raciones</label><input id="porc" type="number" min="1" step="1" value="4" inputmode="numeric"></div>
-    <div><label for="fc">Food cost objetivo (%)</label><input id="fc" type="number" min="5" max="90" step="1" value="30" inputmode="decimal"></div>
+    <div><label for="merma">Merma (%)</label><input id="merma" class="num" inputmode="decimal" value="5"></div>
+    <div><label for="fc">Food cost objetivo (%)</label><input id="fc" class="num" inputmode="decimal" value="30"></div>
+    <div class="pfc"><label>&nbsp;</label><span class="note" style="margin:0">La merma es lo que se pierde al limpiar o cocinar. El food cost objetivo es qué parte del precio de venta quieres que sea ingrediente.</span></div>
    </div>
 
    <div class="results">
-    <div class="res"><b id="rTotal">0,00</b><span>Coste total de la receta</span></div>
+    <div class="res"><b id="rTotal">0,00</b><span>Coste total de la receta (con merma)</span></div>
     <div class="res"><b id="rPorc">0,00</b><span>Coste por ración</span></div>
-    <div class="res main"><b id="rPvp">0,00</b><span>Precio de venta sugerido</span></div>
+    <div class="res main"><b id="rPvp">0,00</b><span>Precio de venta sugerido por ración</span></div>
    </div>
-   <p class="note">Precio sugerido = coste por ración ÷ food cost objetivo. «Cantidad usada» y «cantidad comprada» deben ir en la misma unidad (por ejemplo, gramos). Orientativo: no incluye impuestos ni otros gastos.</p>
+   <p class="note">Precio sugerido = coste por ración ÷ food cost objetivo. Los precios del ejemplo son orientativos. No incluye impuestos ni otros gastos.</p>
 
    <div class="cta-box">
     <div><strong>Con ChefCost guardas tus recetas, controlas tu carta entera y exportas fichas técnicas en PDF.</strong></div>
@@ -163,37 +184,98 @@ footer a{color:var(--muted)}
 
 <script>
 (function(){
- var rows=document.getElementById('rows');
- var sample=[["Arroz",320,2.4,1000],["Caldo de pescado",1200,3.5,1000],["Gambas",400,14,1000],["Aceite de oliva",60,9,1000]];
- function fmt(n){var c=document.getElementById('cur').value;var s=(isFinite(n)?n:0).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2});return c==='€'?s+' €':c+' '+s;}
- function num(el){var v=parseFloat(String(el.value).replace(',','.'));return isFinite(v)?v:0;}
- function addRow(d){
-  d=d||["",0,0,0];
-  var r=document.createElement('div');r.className='row';
-  r.innerHTML='<div class="name"><input aria-label="Ingrediente" placeholder="Ingrediente" value="'+d[0]+'"></div>'+
-   '<div><small class="m">Usada</small><input aria-label="Cantidad usada" type="number" min="0" step="any" inputmode="decimal" placeholder="Usada" value="'+(d[1]||'')+'"></div>'+
-   '<div><small class="m">Precio compra</small><input aria-label="Precio de compra" type="number" min="0" step="any" inputmode="decimal" placeholder="Precio" value="'+(d[2]||'')+'"></div>'+
-   '<div><small class="m">Comprada</small><input aria-label="Cantidad comprada" type="number" min="0" step="any" inputmode="decimal" placeholder="Comprada" value="'+(d[3]||'')+'"></div>'+
-   '<button class="del" type="button" aria-label="Quitar ingrediente">×</button>';
-  r.querySelector('.del').onclick=function(){r.remove();calc();};
-  r.addEventListener('input',calc);
-  rows.appendChild(r);
+ // Unidades: tipo y factor a la unidad base (g, ml, ud)
+ var UNITS={g:['m',1],kg:['m',1000],ml:['v',1],l:['v',1000],ud:['u',1]};
+ var UNIT_LABEL={g:'g',kg:'kg',ml:'ml',l:'l',ud:'unidades'};
+ // Ejemplo: paella de marisco para 4 (precios orientativos)
+ var SAMPLE=[
+  ['Arroz bomba',320,'g',3.5,1,'kg'],
+  ['Caldo de pescado',1.2,'l',4,1,'l'],
+  ['Gambas',400,'g',14,1,'kg'],
+  ['Mejillones',500,'g',4.5,1,'kg'],
+  ['Calamar',300,'g',9,1,'kg'],
+  ['Tomate triturado',150,'g',1.8,1000,'g'],
+  ['Aceite de oliva virgen extra',60,'ml',9,1,'l'],
+  ['Ajos',3,'ud',1.2,10,'ud'],
+  ['Hebras de azafrán',0.3,'g',5,1,'g']
+ ];
+ var ings=document.getElementById('ings');
+
+ // Números en formato español: 1.000 = mil, 3,5 = tres y medio
+ function parseNum(s){
+  s=String(s).trim().replace(/\s/g,'');
+  if(!s) return 0;
+  if(s.indexOf(',')>=0){ s=s.replace(/\./g,'').replace(',','.'); }
+  else if(/^\d{1,3}(\.\d{3})+$/.test(s)){ s=s.replace(/\./g,''); }
+  var v=parseFloat(s); return isFinite(v)?v:0;
+ }
+ function fmtNum(n,dec){
+  if(!isFinite(n)) n=0;
+  var fixed=(dec==null)? String(Math.round(n*1000)/1000) : n.toFixed(dec);
+  var parts=fixed.split('.'); var int=parts[0].replace('-','');
+  int=int.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  var out=(n<0?'-':'')+int; if(parts[1]) out+=','+parts[1]; return out;
+ }
+ function money(n){var c=document.getElementById('cur').value;var s=fmtNum(n,2);return c==='€'?s+' €':c+' '+s;}
+ function curSym(){return document.getElementById('cur').value;}
+
+ function unitSelect(sel){
+  var o='';for(var k in UNITS){o+='<option value="'+k+'"'+(k===sel?' selected':'')+'>'+UNIT_LABEL[k]+'</option>';}
+  return '<select class="unit">'+o+'</select>';
+ }
+ function addIng(d){
+  d=d||['',0,'g',0,1,'kg'];
+  var el=document.createElement('div');el.className='ing';
+  el.innerHTML=
+   '<div class="ing-head"><input class="name" aria-label="Ingrediente" placeholder="Nombre del ingrediente" value="'+d[0]+'">'+
+   '<button class="del" type="button" aria-label="Quitar ingrediente">×</button></div>'+
+   '<div class="ing-body">'+
+    '<div class="grp"><span class="t">Usas</span><input class="num qty use" inputmode="decimal" aria-label="Cantidad que usas" value="'+fmtNum(d[1])+'">'+unitSelect(d[2]).replace('class="unit"','class="unit useu" aria-label="Unidad que usas"')+'</div>'+
+    '<div class="grp"><span class="t">Lo compras a</span><input class="num qty price" inputmode="decimal" aria-label="Precio de compra" value="'+fmtNum(d[3],2)+'"><span class="cs"></span>'+
+     '<span class="t">por</span><input class="num qty buy" inputmode="decimal" aria-label="Cantidad comprada" value="'+fmtNum(d[4])+'">'+unitSelect(d[5]).replace('class="unit"','class="unit buyu" aria-label="Unidad de compra"')+'</div>'+
+    '<div class="cost">Coste: <span class="c">0,00</span></div>'+
+    '<div class="err" hidden></div>'+
+   '</div>';
+  el.querySelector('.del').onclick=function(){el.remove();calc();};
+  el.addEventListener('input',calc);el.addEventListener('change',calc);
+  ings.appendChild(el);
  }
  function calc(){
   var total=0;
-  rows.querySelectorAll('.row').forEach(function(r){var i=r.querySelectorAll('input');var used=num(i[1]),price=num(i[2]),bought=num(i[3]);if(bought>0)total+=used*price/bought;});
-  var merma=Math.min(Math.max(num(document.getElementById('merma')),0),90)/100;
-  var gross=merma<1?total/(1-merma):total;
-  var porc=Math.max(num(document.getElementById('porc')),1);
-  var fc=Math.max(num(document.getElementById('fc')),1)/100;
+  ings.querySelectorAll('.ing').forEach(function(el){
+   var use=parseNum(el.querySelector('.use').value), uu=el.querySelector('.useu').value;
+   var price=parseNum(el.querySelector('.price').value);
+   var buy=parseNum(el.querySelector('.buy').value), bu=el.querySelector('.buyu').value;
+   var err=el.querySelector('.err'); var c=0;
+   el.querySelector('.cs').textContent=curSym();
+   if(UNITS[uu][0]!==UNITS[bu][0]){
+    err.hidden=false; err.textContent='Las unidades no son del mismo tipo: usa peso con peso (g, kg), volumen con volumen (ml, l) o unidades con unidades.';
+   } else {
+    err.hidden=true;
+    var base=buy*UNITS[bu][1];
+    if(base>0) c=use*UNITS[uu][1]*price/base;
+   }
+   el.querySelector('.c').textContent=money(c);
+   total+=c;
+  });
+  var merma=Math.min(Math.max(parseNum(document.getElementById('merma').value),0),90)/100;
+  var gross=total/(1-merma);
+  var porc=Math.max(parseNum(document.getElementById('porc').value),1);
+  var fc=Math.max(parseNum(document.getElementById('fc').value),1)/100;
   var per=gross/porc;
-  document.getElementById('rTotal').textContent=fmt(gross);
-  document.getElementById('rPorc').textContent=fmt(per);
-  document.getElementById('rPvp').textContent=fmt(per/fc);
+  document.getElementById('rTotal').textContent=money(gross);
+  document.getElementById('rPorc').textContent=money(per);
+  document.getElementById('rPvp').textContent=money(per/fc);
  }
- sample.forEach(addRow);
- document.getElementById('add').onclick=function(){addRow();};
- ['cur','merma','porc','fc'].forEach(function(id){document.getElementById(id).addEventListener('input',calc);});
+ // Al salir de un campo numérico, se muestra con puntos de miles: 1000 → 1.000
+ document.addEventListener('focusout',function(e){
+  var t=e.target; if(!t.classList||!t.classList.contains('num')) return;
+  if(String(t.value).trim()==='') return;
+  var v=parseNum(t.value); t.value=t.classList.contains('price')?fmtNum(v,2):fmtNum(v);
+ });
+ SAMPLE.forEach(addIng);
+ document.getElementById('add').onclick=function(){addIng();};
+ ['cur','merma','porc','fc'].forEach(function(id){document.getElementById(id).addEventListener('input',calc);document.getElementById(id).addEventListener('change',calc);});
  calc();
 })();
 </script>
